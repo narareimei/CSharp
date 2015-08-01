@@ -1,0 +1,11 @@
+C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\TestData\01.csv
+C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\TestRunner.dll
+C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\TestRunner.pdb
+C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\CSV01.dll
+C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\nunit.framework.dll
+C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\nunit.mocks.dll
+C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\CSV01.pdb
+C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\nunit.framework.xml
+C:\Develop\CSharp\PGLearning\201507\TestRunner\obj\Debug\TestRunner.csprojResolveAssemblyReference.cache
+C:\Develop\CSharp\PGLearning\201507\TestRunner\obj\Debug\TestRunner.dll
+C:\Develop\CSharp\PGLearning\201507\TestRunner\obj\Debug\TestRunner.pdb

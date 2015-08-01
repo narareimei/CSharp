@@ -1,0 +1,17 @@
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\TestRunner.exe.config
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\TestRunner.exe
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\TestRunner.pdb
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\nunit-gui-runner.dll
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\nunit.framework.dll
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\nunit.mocks.dll
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\nunit.util.dll
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\nunit.uikit.dll
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\nunit.core.dll
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\nunit.core.interfaces.dll
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\nunit.uiexception.dll
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\bin\Debug\nunit.framework.xml
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\obj\Debug\TestRunner.csprojResolveAssemblyReference.cache
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\obj\Debug\TestRunner.Properties.Resources.resources
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\obj\Debug\TestRunner.csproj.GenerateResource.Cache
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\obj\Debug\TestRunner.exe
+C:\Develop\CSharp\PGLearning\TestRunner\TestRunner\obj\Debug\TestRunner.pdb

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--This file represents the results of running a test suite-->
+<test-results name="C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\TestRunner.EXE" total="10" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2015-08-02" time="06:52:50">
+  <environment nunit-version="2.6.4.14350" clr-version="4.0.30319.34014" os-version="Microsoft Windows NT 6.2.9200.0" platform="Win32NT" cwd="C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug" machine-name="MICHAEL" user="nara__000" user-domain="MICHAEL" />
+  <culture-info current-culture="ja-JP" current-uiculture="ja-JP" />
+  <test-suite type="Assembly" name="C:\Develop\CSharp\PGLearning\201507\TestRunner\bin\Debug\TestRunner.EXE" executed="True" result="Success" success="True" time="0.239" asserts="0">
+    <results>
+      <test-suite type="Namespace" name="TestRunner" executed="True" result="Success" success="True" time="0.231" asserts="0">
+        <results>
+          <test-suite type="TestFixture" name="CSV02Unit" executed="True" result="Success" success="True" time="0.230" asserts="0">
+            <results>
+              <test-case name="TestRunner.CSV02Unit._01_ダブルクォーテーションなし_改行なし_一行" executed="True" result="Success" success="True" time="0.091" asserts="4" />
+              <test-case name="TestRunner.CSV02Unit._01_ダブルクォーテーションなし_改行なし_一行_日本語" executed="True" result="Success" success="True" time="0.001" asserts="6" />
+              <test-case name="TestRunner.CSV02Unit._01_ダブルクォーテーションなし_改行なし_二行" executed="True" result="Success" success="True" time="0.001" asserts="8" />
+              <test-case name="TestRunner.CSV02Unit._02_ダブルクォーテーション有り_クォートエスケープ有り_改行なし_一行" executed="True" result="Success" success="True" time="0.000" asserts="3" />
+              <test-case name="TestRunner.CSV02Unit._02_ダブルクォーテーション有り_クォート後ろ空白_改行なし_一行" executed="True" result="Success" success="True" time="0.000" asserts="3" />
+              <test-case name="TestRunner.CSV02Unit._02_ダブルクォーテーション有り_クォート後ろ文字_改行なし_一行" executed="True" result="Success" success="True" time="0.051" asserts="0" />
+              <test-case name="TestRunner.CSV02Unit._02_ダブルクォーテーション有り_クォート前空白_改行なし_一行" executed="True" result="Success" success="True" time="0.000" asserts="3" />
+              <test-case name="TestRunner.CSV02Unit._02_ダブルクォーテーション有り_クォート前文字_改行なし_一行" executed="True" result="Success" success="True" time="0.036" asserts="0" />
+              <test-case name="TestRunner.CSV02Unit._02_ダブルクォーテーション有り_クォート前文字なし_改行なし_一行" executed="True" result="Success" success="True" time="0.000" asserts="3" />
+              <test-case name="TestRunner.CSV02Unit.設定確認" executed="True" result="Success" success="True" time="0.000" asserts="1" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>
