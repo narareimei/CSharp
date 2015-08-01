@@ -16,21 +16,16 @@ namespace PGLearning201507.CSV02
         enum Mode
         {
             INIT = 0,
-            //TOKEN_BEGIN,
             TOKEN_INSIDE,
             QUOTE_BEGIN,
             QUOTE_INSIDE,
             QUOTE_ESCAPE,
-            //QUOTE_ESCAPE_INSIDE,
-            //QUOTE_ESCAPE_END,
-            //QUOTE_END,
-            //TOKEN_END,
             TOKEN_OUTSIDE,
             DELIMITTER
         };
 
         /// <summary>
-        /// 文字の種類
+        /// 文字分類
         /// </summary>
         enum CharcterType
         {
@@ -49,19 +44,21 @@ namespace PGLearning201507.CSV02
         }
 
 
-        static public String[] ReadFields(TextReader reader)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        static public String[] ReadFields(TextReader reader, bool trimming = true)
         {
-
-            //var fields = new[] { "a", "b", "c" };
+            // TODO クォートで囲まれない場合に、トークン前後の空白をトリミングするかを指定可能とする
+            // TODO 例外は専用例外を設ける
 
             var fields = new List<String>();
+            var field = new StringBuilder();
+            var mode = Mode.INIT;
+            var quotedToken = false;
 
-            //fields.Add("a");
-            //fields.Add("b");
-            //fields.Add("c");
-
-            var sb = new StringBuilder();
-            Mode mode = Mode.INIT;
             while (true)
             {
                 var ch = Read(reader);
@@ -71,26 +68,29 @@ namespace PGLearning201507.CSV02
                     case CharcterType.EOF:
                         if(mode ==Mode.DELIMITTER)
                         {
-                            // TODO
+                            // TODO 行末カンマ
                             throw new InvalidDataException("行末がカンマで終了しています。");
                         }else
-                        if (sb.Length > 0)
+                        if (field.Length > 0)
                         {
-                            fields.Add(sb.ToString());
+                            RegisterField(fields, field.ToString(), quotedToken, trimming);
+                            quotedToken = false;
+                            field.Clear();
                         }
                         return fields.ToArray();
                         break;
 
                     case CharcterType.EOL:
-                        // TODO 暫定
                         if(mode ==Mode.DELIMITTER)
                         {
-                            // TODO
+                            // TODO 行末カンマ
                             throw new InvalidDataException("行末がカンマで終了しています。");
                         }else
-                        if (sb.Length > 0)
+                        if (field.Length > 0)
                         {
-                            fields.Add(sb.ToString());
+                            RegisterField(fields, field.ToString(), quotedToken, trimming);
+                            quotedToken = false;
+                            field.Clear();
                         }
                         return fields.ToArray();
                         break;
@@ -100,10 +100,19 @@ namespace PGLearning201507.CSV02
                         {
                             mode = Mode.TOKEN_OUTSIDE;
                         }
+                        else if (mode == Mode.QUOTE_BEGIN)
+                        {
+                            mode = Mode.QUOTE_INSIDE;
+                            field.Append(ch);
+                        }
+                        else if (mode == Mode.QUOTE_INSIDE)
+                        {
+                            field.Append(ch);
+                        }
                         else
                         {
-                        mode = Mode.TOKEN_INSIDE;
-                            sb.Append(ch);
+                            mode = Mode.TOKEN_INSIDE;
+                            field.Append(ch);
                         }
 
                         break;
@@ -111,8 +120,9 @@ namespace PGLearning201507.CSV02
                     case CharcterType.DELIMITTER:
                         mode = Mode.DELIMITTER;
 
-                        fields.Add(sb.ToString());
-                        sb.Clear();
+                        RegisterField(fields, field.ToString(), quotedToken, trimming);
+                        quotedToken = false;
+                        field.Clear();
                         break;
 
                     case CharcterType.NORMAL_CHARACTER:
@@ -124,72 +134,105 @@ namespace PGLearning201507.CSV02
                         {
                             // do nothing
                         }
-                        else if (mode == Mode.TOKEN_OUTSIDE)
-                        {
-                            throw new Exception("フォーマット異常。クォート閉じ後に文字が存在します。");
-                        }
                         else if (mode == Mode.QUOTE_ESCAPE)
                         {
                             // エスケープじゃなかった
                             throw new Exception("フォーマット異常。クォート閉じ直後に文字が存在します。");
+                        }
+                        else if (mode == Mode.TOKEN_OUTSIDE)
+                        {
+                            throw new Exception("フォーマット異常。クォート閉じ後に文字が存在します。");
                         }
 
                         else
                         {
                             mode = Mode.TOKEN_INSIDE;
                         }
-                        sb.Append(ch);
+                        field.Append(ch);
                         break;
 
                     case CharcterType.QUOTATION:
-                        //if(mode == Mode.QUOTE_INSIDE)
-                        //{
-                        //    mode = Mode.QUOTE_END;
-                        //    fields.Add(sb.ToString());
-                        //    sb.Clear();
-                        //}else
-                        if(mode == Mode.TOKEN_INSIDE)
+                        if(mode == Mode.INIT)
                         {
-                            if( string.IsNullOrEmpty(sb.ToString().Trim()))
+                            mode = Mode.QUOTE_BEGIN;
+                        }
+                        else　if( mode == Mode.QUOTE_BEGIN || mode == Mode.QUOTE_INSIDE)
+                        {
+                            mode = Mode.QUOTE_ESCAPE;
+                            quotedToken = true;
+                        }
+                        else if( mode == Mode.QUOTE_ESCAPE )
+                        {
+                            field.Append(ch);
+
+                            mode = Mode.QUOTE_INSIDE;
+                        }
+                        else if(mode == Mode.TOKEN_INSIDE)
+                        {
+                            if( string.IsNullOrEmpty(field.ToString().Trim()))
                             {
                                 mode = Mode.QUOTE_BEGIN;
-                                sb.Clear();
+                                field.Clear();
                             }else
                             {
                                 throw new Exception("フォーマット異常。ダブルクォーテーションの前に文字が存在します。");
                             }
 
-                        }else
-                        if(mode == Mode.INIT || mode == Mode.DELIMITTER)
+                        }
+                        else if (mode == Mode.TOKEN_OUTSIDE)
+                        {
+                            throw new Exception("フォーマット異常。トークン終了後にクォートが存在します。");
+                        }
+
+                        else if (mode == Mode.DELIMITTER)
                         {
                             mode = Mode.QUOTE_BEGIN;
-                        }else
-                        if( mode == Mode.QUOTE_BEGIN || mode == Mode.QUOTE_INSIDE)
-                        {
-                            //fields.Add(sb.ToString());
-                            //sb.Clear();
-                            //mode = Mode.QUOTE_END;
-                            mode = Mode.QUOTE_ESCAPE;
-                        }
-                        else if( mode == Mode.QUOTE_ESCAPE )
-                        {
-                            sb.Append(ch);
-
-                            mode = Mode.QUOTE_INSIDE;
                         }
 
-                        //throw new NotImplementedException("クォテーションはまだ実装していません。");
                         break;
 
                     default:
                         Debug.Assert(false, "ClassifyCharacter()の戻り値が不正です");
                         break;
                 }
-
-
             }
 
             return fields.ToArray();
+        }
+
+
+        /// <summary>
+        /// １フィールドを結果リストへ登録する
+        /// <para>トークン前後のトリミングを行なう。</para>
+        /// <para>クオテーションで囲まれていない場合のみトリミングの対象とする</para>
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <param name="field"></param>
+        /// <param name="quotedToken"></param>
+        /// <param name="trimming"></param>
+        static private void RegisterField( List<string> fields, string field, bool quotedToken, bool trimming)
+        {
+            if (!quotedToken && trimming)
+            {
+                fields.Add(field.Trim());
+            }else
+            {
+                fields.Add(field);
+            }
+            return;
+        }
+
+        /// <summary>
+        /// トークン前後空白のトリミング
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="trimming"></param>
+        /// <returns></returns>
+        private string TrimToken(string token, bool trimming)
+        {
+            // TODO そのトークンがダブルクォーテーションでくくられていたか否かで、トリミングの扱いが違ってくる
+
+            return (trimming) ? token.Trim() : token;
         }
 
         /// <summary>
@@ -226,6 +269,7 @@ namespace PGLearning201507.CSV02
                         return "\u000d";
                     }
                     break;
+
                 case '\u000a':
                     return "\u000a";
                     break;
