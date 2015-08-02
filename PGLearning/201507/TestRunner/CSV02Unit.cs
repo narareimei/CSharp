@@ -181,6 +181,18 @@ namespace TestRunner
             Assert.True(fields[1].Equals(" def ", StringComparison.Ordinal) == true);
             return;
         }
+        [Test]
+        public void _03_ダブルクォーテーションなし_前後空白のトリミングなし_オプショナル引数()
+        {
+
+            var reader = new StringReader(" abc , def ");
+            var fields = CSVReader.ReadFields(reader);
+
+            Assert.True(fields.Count() == 2);
+            Assert.True(fields[0].Equals(" abc ", StringComparison.Ordinal) == true);
+            Assert.True(fields[1].Equals(" def ", StringComparison.Ordinal) == true);
+            return;
+        }
 
         [Test]
         public void _03_ダブルクォーテーションなし_前後空白のトリミング有り()
@@ -195,18 +207,6 @@ namespace TestRunner
             return;
         }
 
-        [Test]
-        public void _03_ダブルクォーテーションなし_前後空白のトリミング有り_オプショナル引数()
-        {
-
-            var reader = new StringReader(" abc , def ");
-            var fields = CSVReader.ReadFields(reader);
-
-            Assert.True(fields.Count() == 2);
-            Assert.True(fields[0].Equals("abc", StringComparison.Ordinal) == true);
-            Assert.True(fields[1].Equals("def", StringComparison.Ordinal) == true);
-            return;
-        }
 
         [Test]
         public void _04_ダブルクォーテーションなし_前後空白のトリミングなし()
@@ -234,5 +234,49 @@ namespace TestRunner
             return;
         }
 
+
+        [Test]
+        [ExpectedException(typeof(Exception))]
+        public void _05_ダブルクォーテーション有り_閉じずにファイル終了()
+        {
+            var reader = new StringReader(" \"abc");
+            var fields = CSVReader.ReadFields(reader);
+
+            return;
+        }
+
+        [Test]
+        public void _06_ダブルクォーテーション有り_改行()
+        {
+            var reader = new StringReader(" \"abc\ndef\",def");
+            var fields = CSVReader.ReadFields(reader);
+
+            Assert.True(fields.Count() == 2);
+            Assert.True(fields[0].Equals("abc\ndef", StringComparison.Ordinal) == true);
+            Assert.True(fields[1].Equals("def", StringComparison.Ordinal) == true);
+            return;
+        }
+
+        [Test]
+        [ExpectedException(typeof(Exception))]
+        public void _07_ダブルクォーテーション有り_カンマで終了()
+        {
+            var reader = new StringReader(" \"abc\",");
+            var fields = CSVReader.ReadFields(reader);
+
+            return;
+        }
+
+        [Test]
+        public void _07_ダブルクォーテーション有り_カンマと空白で終了()
+        {
+            var reader = new StringReader(" \"abc\", ");
+            var fields = CSVReader.ReadFields(reader,false);
+
+            Assert.True(fields.Count() == 2);
+            Assert.True(fields[0].Equals("abc", StringComparison.Ordinal) == true);
+            Assert.True(fields[1].Equals(" ", StringComparison.Ordinal) == true);
+            return;
+        }
     }
 }

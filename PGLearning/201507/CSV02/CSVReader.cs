@@ -49,7 +49,7 @@ namespace PGLearning201507.CSV02
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        static public String[] ReadFields(TextReader reader, bool trimming = true)
+        static public String[] ReadFields(TextReader reader, bool trimming = false)
         {
             // TODO クォートで囲まれない場合に、トークン前後の空白をトリミングするかを指定可能とする
             // TODO 例外は専用例外を設ける
@@ -66,12 +66,19 @@ namespace PGLearning201507.CSV02
                 switch(ClassifyCharacter(ch)) 
                 {
                     case CharcterType.EOF:
-                        if(mode ==Mode.DELIMITTER)
+
+                        if (mode == Mode.QUOTE_BEGIN || mode == Mode.QUOTE_INSIDE)
+                        {
+                            throw new Exception("ダブルクォーテーションが閉じられずにファイルが終了しました。");
+                        }
+
+                        else if(mode ==Mode.DELIMITTER)
                         {
                             // TODO 行末カンマ
-                            throw new InvalidDataException("行末がカンマで終了しています。");
-                        }else
-                        if (field.Length > 0)
+                            throw new Exception("行末がカンマで終了しています。");
+                        }
+                        
+                        else if (field.Length > 0)
                         {
                             RegisterField(fields, field.ToString(), quotedToken, trimming);
                             quotedToken = false;
@@ -81,18 +88,22 @@ namespace PGLearning201507.CSV02
                         break;
 
                     case CharcterType.EOL:
-                        if(mode ==Mode.DELIMITTER)
+                        if( mode == Mode.QUOTE_INSIDE )
+                        {
+                            field.Append(ch);
+                        }
+                        else if(mode ==Mode.DELIMITTER)
                         {
                             // TODO 行末カンマ
                             throw new InvalidDataException("行末がカンマで終了しています。");
-                        }else
-                        if (field.Length > 0)
+                        }
+                        else if (field.Length > 0)
                         {
                             RegisterField(fields, field.ToString(), quotedToken, trimming);
                             quotedToken = false;
                             field.Clear();
+                            return fields.ToArray();
                         }
-                        return fields.ToArray();
                         break;
 
                     case CharcterType.BLANK:
