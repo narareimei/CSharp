@@ -106,7 +106,7 @@ namespace TestRunner
         }
 
         [Test]
-        [ExpectedException( typeof( Exception ) )]
+        [ExpectedException( typeof( MalformedFormatException ) )]
         public void _02_ダブルクォーテーション有り_クォート前文字_改行なし_一行( )
         {
 
@@ -144,7 +144,7 @@ namespace TestRunner
         }
 
         [Test]
-        [ExpectedException( typeof( Exception ) )]
+        [ExpectedException( typeof( MalformedFormatException ) )]
         public void _02_ダブルクォーテーション有り_クォート後ろ文字_改行なし_一行( )
         {
 
@@ -169,7 +169,7 @@ namespace TestRunner
         }
 
         [Test]
-        [ExpectedException( typeof( Exception ) )]
+        [ExpectedException( typeof( MalformedFormatException ) )]
         public void _02_ダブルクォーテーション有り_クォート後ろ空白とクォート_改行なし_一行( )
         {
 
@@ -249,7 +249,7 @@ namespace TestRunner
 
 
         [Test]
-        [ExpectedException( typeof( Exception ) )]
+        [ExpectedException( typeof( MalformedFormatException ) )]
         public void _05_ダブルクォーテーション有り_閉じずにファイル終了( )
         {
             var reader = new StringReader( " \"abc" );
@@ -271,7 +271,7 @@ namespace TestRunner
         }
 
         [Test]
-        [ExpectedException( typeof( Exception ) )]
+        [ExpectedException( typeof( MalformedFormatException ) )]
         public void _07_ダブルクォーテーション有り_カンマで終了( )
         {
             var reader = new StringReader( " \"abc\"," );
@@ -293,7 +293,7 @@ namespace TestRunner
         }
 
         [Test]
-        [ExpectedException( typeof( Exception ) )]
+        [ExpectedException( typeof( MalformedFormatException ) )]
         public void _08_ダブルクォーテーション始まりだけで終了( )
         {
             var reader = new StringReader( " \"abc\",\"" );
@@ -301,5 +301,28 @@ namespace TestRunner
 
             return;
         }
+
+        [Test]
+        public void _08_ダブルクォーテーション有り_トークン内にカンマあり( )
+        {
+            var reader = new StringReader( " \"ab,c\",def" );
+            var fields = CSVReader.ReadFields( reader, false );
+
+            Assert.True( fields.Count( ) == 2 );
+            Assert.True( fields [ 0 ].Equals( "ab,c", StringComparison.Ordinal ) == true );
+            Assert.True( fields [ 1 ].Equals( "def", StringComparison.Ordinal ) == true );
+            return;
+        }
+        public void _08_ダブルクォーテーション有り_トークンいきなりカンマあり( )
+        {
+            var reader = new StringReader( " \",abc\",def" );
+            var fields = CSVReader.ReadFields( reader, false );
+
+            Assert.True( fields.Count( ) == 2 );
+            Assert.True( fields [ 0 ].Equals( ",abc", StringComparison.Ordinal ) == true );
+            Assert.True( fields [ 1 ].Equals( "def", StringComparison.Ordinal ) == true );
+            return;
+        }
+
     }
 }

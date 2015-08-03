@@ -10,10 +10,18 @@ namespace PGLearning201507.CSV02
 {
     public class CSVReader
     {
+        /////////////////////////////////////////////////////////////////////////////////
+        // 定数
+        /////////////////////////////////////////////////////////////////////////////////
+
+
+        /////////////////////////////////////////////////////////////////////////////////
+        // 列挙子
+        /////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// 処理状態
         /// </summary>
-        enum Mode
+        enum Position
         {
             INIT = 0,
             TOKEN_INSIDE,
@@ -38,26 +46,18 @@ namespace PGLearning201507.CSV02
         };
 
 
-        static public int Read( String fileName )
-        {
-            return 0;
-        }
-
-
         /// <summary>
-        /// 
+        /// １行分のカラム取得
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns></returns>
+        /// <param name="reader">テキストリーダー</param>
+        /// <param name="trimming">トークン前後の空白トリミング指定</param>
+        /// <returns>カラム値の配列</returns>
         static public String [ ] ReadFields( TextReader reader, bool trimming = false )
         {
-            // TODO クォートで囲まれない場合に、トークン前後の空白をトリミングするかを指定可能とする
-            // TODO 例外は専用例外を設ける
-
             var fields = new List<String>( );
             var field = new StringBuilder( );
-            var mode = Mode.INIT;
             var quotedToken = false;
+            var pos = Position.INIT;
 
             while ( true )
             {
@@ -66,15 +66,14 @@ namespace PGLearning201507.CSV02
                 switch ( ClassifyCharacter( ch ) )
                 {
                     case CharcterType.EOF:
-                        if ( mode == Mode.QUOTE_BEGIN || mode == Mode.QUOTE_INSIDE )
+                        if ( pos == Position.QUOTE_BEGIN || pos == Position.QUOTE_INSIDE )
                         {
-                            throw new Exception( "ダブルクォーテーションが閉じられずにファイルが終了しました。" );
+                            throw new MalformedFormatException( "ダブルクォーテーションが閉じられずにファイルが終了しました。" );
                         }
 
-                        else if ( mode == Mode.DELIMITTER )
+                        else if ( pos == Position.DELIMITTER )
                         {
-                            // TODO 行末カンマ
-                            throw new Exception( "行末がカンマで終了しています。" );
+                            throw new MalformedFormatException( "行末がカンマで終了しています。" );
                         }
 
                         else
@@ -94,13 +93,12 @@ namespace PGLearning201507.CSV02
                         break;
 
                     case CharcterType.EOL:
-                        if ( mode == Mode.QUOTE_BEGIN || mode == Mode.QUOTE_INSIDE )
+                        if ( pos == Position.QUOTE_BEGIN || pos == Position.QUOTE_INSIDE )
                         {
                             field.Append( ch );
                         }
-                        else if ( mode == Mode.DELIMITTER )
+                        else if ( pos == Position.DELIMITTER )
                         {
-                            // TODO 行末カンマ
                             throw new InvalidDataException( "行末がカンマで終了しています。" );
                         }
                         else
@@ -120,20 +118,20 @@ namespace PGLearning201507.CSV02
                         break;
 
                     case CharcterType.BLANK:
-                        if ( mode == Mode.QUOTE_BEGIN )
+                        if ( pos == Position.QUOTE_BEGIN )
                         {
-                            mode = Mode.QUOTE_INSIDE;
+                            pos = Position.QUOTE_INSIDE;
                             field.Append( ch );
                         }
-                        else if ( mode == Mode.QUOTE_INSIDE )
+                        else if ( pos == Position.QUOTE_INSIDE )
                         {
                             field.Append( ch );
                         }
-                        else if ( mode == Mode.QUOTE_ESCAPE )
+                        else if ( pos == Position.QUOTE_ESCAPE )
                         {
-                            mode = Mode.TOKEN_OUTSIDE;
+                            pos = Position.TOKEN_OUTSIDE;
                         }
-                        else if ( mode == Mode.TOKEN_OUTSIDE )
+                        else if ( pos == Position.TOKEN_OUTSIDE )
                         {
                             // do nothing
                             Debug.Print( "do nothing" );
@@ -143,104 +141,102 @@ namespace PGLearning201507.CSV02
                             //INIT = 0,
                             //TOKEN_INSIDE,
                             //DELIMITTER
-                            mode = Mode.TOKEN_INSIDE;
+                            pos = Position.TOKEN_INSIDE;
                             field.Append( ch );
                         }
 
                         break;
 
                     case CharcterType.DELIMITTER:
-                        //INIT = 0,
-                        //TOKEN_INSIDE,
-                        //QUOTE_BEGIN,
-                        //QUOTE_INSIDE,
-                        //QUOTE_ESCAPE,
-                        //TOKEN_OUTSIDE,
-                        //DELIMITTER
-                        mode = Mode.DELIMITTER;
+                        if ( pos == Position.QUOTE_BEGIN )
+                        {
+                            pos = Position.QUOTE_INSIDE;
+                            field.Append( ch );
+                        }
+                        else if (  pos == Position.QUOTE_INSIDE )
+                        {
+                            field.Append( ch );
+                        }
+                        else
+                        {
+                            //INIT = 0,
+                            //TOKEN_INSIDE,
+                            //QUOTE_ESCAPE,
+                            //TOKEN_OUTSIDE,
+                            //DELIMITTER
+                            pos = Position.DELIMITTER;
 
-                        RegisterField( fields, field.ToString( ), quotedToken, trimming );
-                        quotedToken = false;
-                        field.Clear( );
-                        break;
+                            RegisterField( fields, field.ToString( ), quotedToken, trimming );
+                            quotedToken = false;
+                            field.Clear( );                        
+                        }
+                        
+                    break;
 
                     case CharcterType.NORMAL_CHARACTER:
-                        //INIT = 0,
-                        //TOKEN_INSIDE,
-                        //QUOTE_BEGIN,
-                        //QUOTE_INSIDE,
-                        //QUOTE_ESCAPE,
-                        //TOKEN_OUTSIDE,
-                        //DELIMITTER
-                        if ( mode == Mode.QUOTE_BEGIN )
+                        if ( pos == Position.QUOTE_BEGIN )
                         {
-                            mode = Mode.QUOTE_INSIDE;
+                            pos = Position.QUOTE_INSIDE;
                         }
-                        else if ( mode == Mode.QUOTE_INSIDE )
+                        else if ( pos == Position.QUOTE_INSIDE )
                         {
                             // do nothing
                         }
-                        else if ( mode == Mode.QUOTE_ESCAPE )
+                        else if ( pos == Position.QUOTE_ESCAPE )
                         {
                             // エスケープじゃなかった
-                            throw new Exception( "フォーマット異常。クォート閉じ直後に文字が存在します。" );
+                            throw new MalformedFormatException( "フォーマット異常。クォート閉じ直後に文字が存在します。" );
                         }
-                        else if ( mode == Mode.TOKEN_OUTSIDE )
+                        else if ( pos == Position.TOKEN_OUTSIDE )
                         {
-                            throw new Exception( "フォーマット異常。クォート閉じ後に文字が存在します。" );
+                            throw new MalformedFormatException( "フォーマット異常。クォート閉じ後に文字が存在します。" );
                         }
-
                         else
                         {
-                            mode = Mode.TOKEN_INSIDE;
+                            //INIT = 0,
+                            //TOKEN_INSIDE,
+                            //DELIMITTER
+                            pos = Position.TOKEN_INSIDE;
                         }
                         field.Append( ch );
                         break;
 
                     case CharcterType.QUOTATION:
-                        //INIT = 0,
-                        //TOKEN_INSIDE,
-                        //QUOTE_BEGIN,
-                        //QUOTE_INSIDE,
-                        //QUOTE_ESCAPE,
-                        //TOKEN_OUTSIDE,
-                        //DELIMITTER
-                        if ( mode == Mode.INIT )
+                        if ( pos == Position.INIT )
                         {
-                            mode = Mode.QUOTE_BEGIN;
+                            pos = Position.QUOTE_BEGIN;
                         }
-                        else if ( mode == Mode.QUOTE_BEGIN || mode == Mode.QUOTE_INSIDE )
+                        else if ( pos == Position.QUOTE_BEGIN || pos == Position.QUOTE_INSIDE )
                         {
-                            mode = Mode.QUOTE_ESCAPE;
+                            pos = Position.QUOTE_ESCAPE;
                             quotedToken = true;
                         }
-                        else if ( mode == Mode.QUOTE_ESCAPE )
+                        else if ( pos == Position.QUOTE_ESCAPE )
                         {
                             field.Append( ch );
 
-                            mode = Mode.QUOTE_INSIDE;
+                            pos = Position.QUOTE_INSIDE;
                         }
-                        else if ( mode == Mode.TOKEN_INSIDE )
+                        else if ( pos == Position.TOKEN_INSIDE )
                         {
                             if ( string.IsNullOrEmpty( field.ToString( ).Trim( ) ) )
                             {
-                                mode = Mode.QUOTE_BEGIN;
+                                pos = Position.QUOTE_BEGIN;
                                 field.Clear( );
                             }
                             else
                             {
-                                throw new Exception( "フォーマット異常。ダブルクォーテーションの前に文字が存在します。" );
+                                throw new MalformedFormatException( "フォーマット異常。ダブルクォーテーションの前に文字が存在します。" );
                             }
 
                         }
-                        else if ( mode == Mode.TOKEN_OUTSIDE )
+                        else if ( pos == Position.TOKEN_OUTSIDE )
                         {
-                            throw new Exception( "フォーマット異常。トークン終了後にクォートが存在します。" );
+                            throw new MalformedFormatException( "フォーマット異常。トークン終了後にクォートが存在します。" );
                         }
-
-                        else if ( mode == Mode.DELIMITTER )
+                        else if ( pos == Position.DELIMITTER )
                         {
-                            mode = Mode.QUOTE_BEGIN;
+                            pos = Position.QUOTE_BEGIN;
                         }
 
                         break;
@@ -275,19 +271,6 @@ namespace PGLearning201507.CSV02
                 fields.Add( field );
             }
             return;
-        }
-
-        /// <summary>
-        /// トークン前後空白のトリミング
-        /// </summary>
-        /// <param name="token"></param>
-        /// <param name="trimming"></param>
-        /// <returns></returns>
-        private string TrimToken( string token, bool trimming )
-        {
-            // TODO そのトークンがダブルクォーテーションでくくられていたか否かで、トリミングの扱いが違ってくる
-
-            return ( trimming ) ? token.Trim( ) : token;
         }
 
         /// <summary>
@@ -371,6 +354,16 @@ namespace PGLearning201507.CSV02
 
             return CharcterType.NORMAL_CHARACTER;
         }
-
+    }
+    /////////////////////////////////////////////////////////////////////////////////
+    // 例外クラス
+    /////////////////////////////////////////////////////////////////////////////////
+    public class MalformedFormatException : Exception
+    {
+        public MalformedFormatException( string message )
+            : base( message )
+        {
+            ;
+        }
     }
 }
